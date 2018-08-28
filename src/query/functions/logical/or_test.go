@@ -97,8 +97,7 @@ func generateMetaDataWithTagsInRange(fromRange, toRange int) []block.SeriesMeta 
 	meta := make([]block.SeriesMeta, length)
 	for i := 0; i < length; i++ {
 		strIdx := fmt.Sprint(fromRange + i)
-		tags := make(models.Tags)
-		tags[strIdx] = strIdx
+		tags := models.Tags{{strIdx, strIdx}}
 		meta[i] = block.SeriesMeta{
 			Tags: tags,
 			Name: strIdx,
@@ -255,7 +254,6 @@ func TestOrsBoundsError(t *testing.T) {
 		StepSize: time.Minute,
 	}
 
-
 	op, err := NewLogicalOp(
 		OrType,
 		parser.NodeID(0),
@@ -283,8 +281,8 @@ func TestOrsBoundsError(t *testing.T) {
 
 func createSeriesMeta() []block.SeriesMeta {
 	return []block.SeriesMeta{
-		{Tags: models.Tags{"foo": "bar"}},
-		{Tags: models.Tags{"baz": "qux"}},
+		{Tags: models.Tags{{"foo", "bar"}}},
+		{Tags: models.Tags{{"baz", "qux"}}},
 	}
 }
 
@@ -308,7 +306,7 @@ func TestOrCombinedMetadata(t *testing.T) {
 
 	lhsMeta := block.Metadata{
 		Bounds: bounds,
-		Tags:   models.Tags{"a": "b", "c": "d", "e": "f"},
+		Tags:   models.Tags{{"a", "b"}, {"c", "d"}, {"e", "f"}},
 	}
 
 	lSeriesMeta := createSeriesMeta()
@@ -322,7 +320,7 @@ func TestOrCombinedMetadata(t *testing.T) {
 
 	rhsMeta := block.Metadata{
 		Bounds: bounds,
-		Tags:   models.Tags{"a": "b", "c": "*d", "g": "h"},
+		Tags:   models.Tags{{"a", "b"}, {"c", "*d"}, {"g", "h"}},
 	}
 
 	// NB (arnikola): since common tags for the series differ,
@@ -340,13 +338,13 @@ func TestOrCombinedMetadata(t *testing.T) {
 	test.EqualsWithNans(t, [][]float64{{1, 2}, {10, 20}, {3, 4}, {30, 40}}, sink.Values)
 
 	assert.Equal(t, sink.Meta.Bounds, bounds)
-	assert.Equal(t, sink.Meta.Tags, models.Tags{"a": "b"})
+	assert.Equal(t, sink.Meta.Tags, models.Tags{{"a", "b"}})
 
 	expectedMetas := []block.SeriesMeta{
-		{Tags: models.Tags{"foo": "bar", "c": "d", "e": "f"}},
-		{Tags: models.Tags{"baz": "qux", "c": "d", "e": "f"}},
-		{Tags: models.Tags{"foo": "bar", "c": "*d", "g": "h"}},
-		{Tags: models.Tags{"baz": "qux", "c": "*d", "g": "h"}},
+		{Tags: models.Tags{{"foo", "bar"}, {"c", "d"}, {"e", "f"}}},
+		{Tags: models.Tags{{"baz", "qux"}, {"c", "d"}, {"e", "f"}}},
+		{Tags: models.Tags{{"foo", "bar"}, {"c", "*d"}, {"g", "h"}}},
+		{Tags: models.Tags{{"baz", "qux"}, {"c", "*d"}, {"g", "h"}}},
 	}
 
 	assert.Equal(t, expectedMetas, sink.Metas)

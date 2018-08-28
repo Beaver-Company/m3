@@ -129,69 +129,69 @@ var combineMetaAndSeriesMetaTests = []struct {
 }{
 	{
 		"no right tags",
-		models.Tags{"a": "b"},
+		models.Tags{{"a", "b"}},
 		models.Tags{},
 		models.Tags{},
 
-		models.Tags{"c": "d"},
-		models.Tags{"1": "2"},
-		models.Tags{"a": "b", "c": "d"},
-		models.Tags{"1": "2"},
+		models.Tags{{"c", "d"}},
+		models.Tags{{"1", "2"}},
+		models.Tags{{"a", "b"}, {"c", "d"}},
+		models.Tags{{"1", "2"}},
 	},
 	{
 		"no left tags",
 		models.Tags{},
-		models.Tags{"a": "b"},
+		models.Tags{{"a", "b"}},
 		models.Tags{},
 
 		models.Tags{},
 		models.Tags{},
 		models.Tags{},
-		models.Tags{"a": "b"},
+		models.Tags{{"a", "b"}},
 	},
 	{
 		"same tags",
-		models.Tags{"a": "b"},
-		models.Tags{"a": "b"},
-		models.Tags{"a": "b"},
+		models.Tags{{"a", "b"}},
+		models.Tags{{"a", "b"}},
+		models.Tags{{"a", "b"}},
 
-		models.Tags{"a": "b", "c": "d"},
+		models.Tags{{"a", "b"}, {"c", "d"}},
 		models.Tags{},
-		models.Tags{"a": "b", "c": "d"},
+		models.Tags{{"a", "b"}, {"c", "d"}},
 		models.Tags{},
 	},
 	{
 		"different tags",
-		models.Tags{"a": "b"},
-		models.Tags{"c": "d"},
+		models.Tags{{"a", "b"}},
+		models.Tags{{"c", "d"}},
 		models.Tags{},
 
-		models.Tags{"1": "2"},
-		models.Tags{"3": "4"},
-		models.Tags{"a": "b", "1": "2"},
-		models.Tags{"c": "d", "3": "4"},
+		models.Tags{{"1", "2"}},
+		models.Tags{{"3", "4"}},
+		models.Tags{{"a", "b"}, {"1", "2"}},
+		models.Tags{{"c", "d"}, {"3", "4"}},
 	},
 	{
 		"conflicting tags",
-		models.Tags{"a": "b"},
-		models.Tags{"a": "*b"},
+		models.Tags{{"a", "b"}},
+		models.Tags{{"a", "*b"}},
 		models.Tags{},
 
-		models.Tags{"1": "2"},
-		models.Tags{"3": "4"},
-		models.Tags{"a": "b", "1": "2"},
-		models.Tags{"a": "*b", "3": "4"},
+		models.Tags{{"1", "2"}},
+		models.Tags{{"3", "4"}},
+		models.Tags{{"a", "b"}, {"1", "2"}},
+		models.Tags{{"a", "*b"}, {"3", "4"}},
 	},
 	{
 		"mixed tags",
-		models.Tags{"a": "b", "c": "d", "e": "f"},
-		models.Tags{"a": "b", "c": "*d", "g": "h"},
-		models.Tags{"a": "b"},
+		models.Tags{{"a", "b"}, {"c", "d"}, {"e", "f"}},
+		models.Tags{{"a", "b"}, {"c", "*d"}, {"g", "h"}},
+		models.Tags{{"a", "b"}},
 
-		models.Tags{"1": "2"},
-		models.Tags{"3": "4"},
-		models.Tags{"c": "d", "e": "f", "1": "2"},
-		models.Tags{"c": "*d", "g": "h", "3": "4"},
+		models.Tags{{"1", "2"}},
+		models.Tags{{"3", "4"}},
+		models.Tags{{"c", "d"}, {"e", "f"}, {"1", "2"}},
+		models.Tags{{"c", "*d"}, {"g", "h"}, {"3", "4"}},
 	},
 }
 
@@ -232,16 +232,16 @@ func TestCombineMetaAndSeriesMetaError(t *testing.T) {
 }
 
 func TestFlattenMetadata(t *testing.T) {
-	meta := block.Metadata{Tags: models.Tags{"a": "b", "c": "d"}}
+	meta := block.Metadata{Tags: models.Tags{{"a", "b"}, {"c", "d"}}}
 	seriesMetas := []block.SeriesMeta{
-		{Name: "foo", Tags: models.Tags{"e": "f"}},
-		{Name: "bar", Tags: models.Tags{"g": "h"}},
+		{Name: "foo", Tags: models.Tags{{"e", "f"}}},
+		{Name: "bar", Tags: models.Tags{{"g", "h"}}},
 	}
 	flattened := FlattenMetadata(meta, seriesMetas)
 
 	expected := []block.SeriesMeta{
-		{Name: "foo", Tags: models.Tags{"a": "b", "c": "d", "e": "f"}},
-		{Name: "bar", Tags: models.Tags{"a": "b", "c": "d", "g": "h"}},
+		{Name: "foo", Tags: models.Tags{{"a", "b"}, {"c", "d"}, {"e", "f"}}},
+		{Name: "bar", Tags: models.Tags{{"a", "b"}, {"c", "d"}, {"g", "h"}}},
 	}
 
 	assert.Equal(t, expected, flattened)
@@ -261,33 +261,36 @@ var dedupeMetadataTests = []struct {
 	},
 	{
 		"single metas",
-		[]models.Tags{{"a": "b", "c": "d"}},
-		models.Tags{"a": "b", "c": "d"},
+		[]models.Tags{{{"a", "b"}, {"c", "d"}}},
+		models.Tags{{"a", "b"}, {"c", "d"}},
 		[]models.Tags{{}},
 	},
 	{
 		"one common tag, longer first",
-		[]models.Tags{{"a": "b", "c": "d"}, {"a": "b"}},
-		models.Tags{"a": "b"},
-		[]models.Tags{{"c": "d"}, {}},
+		[]models.Tags{{{"a", "b"}, {"c", "d"}}, {{"a", "b"}}},
+		models.Tags{{"a", "b"}},
+		[]models.Tags{{{"c", "d"}, {}}},
 	},
 	{
 		"one common tag, longer second",
-		[]models.Tags{{"a": "b"}, {"a": "b", "c": "d"}},
-		models.Tags{"a": "b"},
-		[]models.Tags{{}, {"c": "d"}},
+		[]models.Tags{{{"a", "b"}}, {{"a", "b"}, {"c", "d"}}},
+		models.Tags{{"a", "b"}},
+		[]models.Tags{{{}, {"c", "d"}}},
 	},
 	{
 		"two common tags",
-		[]models.Tags{{"a": "b", "c": "d"}, {"a": "b", "c": "d"}, {"a": "b", "c": "d"}},
-		models.Tags{"a": "b", "c": "d"},
+		[]models.Tags{{{"a", "b"}, {"c", "d"}}, {{"a", "b"},
+			{"c", "d"}}, {{"a", "b"}, {"c", "d"}}},
+		models.Tags{{"a", "b"}, {"c", "d"}},
 		[]models.Tags{{}, {}, {}},
 	},
 	{
 		"no common tags in one series",
-		[]models.Tags{{"a": "b", "c": "d"}, {"a": "b", "c": "d"}, {"a": "b*", "c*": "d"}},
+		[]models.Tags{{{"a", "b"}, {"c", "d"}}, {{"a", "b"}, {"c", "d"}},
+			{{"a", "b*"}, {"c*", "d"}}},
 		models.Tags{},
-		[]models.Tags{{"a": "b", "c": "d"}, {"a": "b", "c": "d"}, {"a": "b*", "c*": "d"}},
+		[]models.Tags{{{"a", "b"}, {"c", "d"}}, {{"a", "b"},
+			{"c", "d"}}, {{"a", "b*"}, {"c*", "d"}}},
 	},
 }
 
