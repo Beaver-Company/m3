@@ -123,12 +123,12 @@ func combineMetaAndSeriesMeta(
 
 	// Set common tags
 	meta.Tags = tags
-	for i, meta := range seriesMeta {
-		seriesMeta[i].Tags = meta.Tags.Add(metaTagsToAdd)
+	for i, m := range seriesMeta {
+		seriesMeta[i].Tags = m.Tags.Add(metaTagsToAdd)
 	}
 
-	for i, meta := range otherSeriesMeta {
-		otherSeriesMeta[i].Tags = meta.Tags.Add(otherMetaTagsToAdd)
+	for i, m := range otherSeriesMeta {
+		otherSeriesMeta[i].Tags = m.Tags.Add(otherMetaTagsToAdd)
 	}
 
 	return meta,
@@ -142,10 +142,8 @@ func FlattenMetadata(
 	meta block.Metadata,
 	seriesMeta []block.SeriesMeta,
 ) []block.SeriesMeta {
-	for k, v := range meta.Tags {
-		for _, metas := range seriesMeta {
-			metas.Tags[k] = v
-		}
+	for i, metas := range seriesMeta {
+		seriesMeta[i].Tags = metas.Tags.Add(meta.Tags)
 	}
 
 	return seriesMeta

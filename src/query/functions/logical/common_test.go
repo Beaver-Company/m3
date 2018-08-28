@@ -168,8 +168,8 @@ var combineMetaAndSeriesMetaTests = []struct {
 
 		models.Tags{{"1", "2"}},
 		models.Tags{{"3", "4"}},
-		models.Tags{{"a", "b"}, {"1", "2"}},
-		models.Tags{{"c", "d"}, {"3", "4"}},
+		models.Tags{{"1", "2"}, {"a", "b"}},
+		models.Tags{{"3", "4"}, {"c", "d"}},
 	},
 	{
 		"conflicting tags",
@@ -179,8 +179,8 @@ var combineMetaAndSeriesMetaTests = []struct {
 
 		models.Tags{{"1", "2"}},
 		models.Tags{{"3", "4"}},
-		models.Tags{{"a", "b"}, {"1", "2"}},
-		models.Tags{{"a", "*b"}, {"3", "4"}},
+		models.Tags{{"1", "2"}, {"a", "b"}},
+		models.Tags{{"3", "4"}, {"a", "*b"}},
 	},
 	{
 		"mixed tags",
@@ -190,8 +190,8 @@ var combineMetaAndSeriesMetaTests = []struct {
 
 		models.Tags{{"1", "2"}},
 		models.Tags{{"3", "4"}},
-		models.Tags{{"c", "d"}, {"e", "f"}, {"1", "2"}},
-		models.Tags{{"c", "*d"}, {"g", "h"}, {"3", "4"}},
+		models.Tags{{"1", "2"}, {"c", "d"}, {"e", "f"}},
+		models.Tags{{"3", "4"}, {"c", "*d"}, {"g", "h"}},
 	},
 }
 
@@ -201,7 +201,7 @@ func TestCombineMetaAndSeriesMeta(t *testing.T) {
 			meta, otherMeta := block.Metadata{Tags: tt.tags}, block.Metadata{Tags: tt.otherTags}
 
 			metas := []block.SeriesMeta{{Tags: tt.seriesTags}, {Tags: tt.seriesTags}}
-			otherMetas := []block.SeriesMeta{{Tags: tt.expectedOtherSeriesTags}}
+			otherMetas := []block.SeriesMeta{{Tags: tt.otherSeriesTags}}
 
 			meta, seriesMeta, otherSeriesMeta, err := combineMetaAndSeriesMeta(meta, otherMeta, metas, otherMetas)
 			require.NoError(t, err)
@@ -269,13 +269,13 @@ var dedupeMetadataTests = []struct {
 		"one common tag, longer first",
 		[]models.Tags{{{"a", "b"}, {"c", "d"}}, {{"a", "b"}}},
 		models.Tags{{"a", "b"}},
-		[]models.Tags{{{"c", "d"}, {}}},
+		[]models.Tags{{{"c", "d"}}, {}},
 	},
 	{
 		"one common tag, longer second",
 		[]models.Tags{{{"a", "b"}}, {{"a", "b"}, {"c", "d"}}},
 		models.Tags{{"a", "b"}},
-		[]models.Tags{{{}, {"c", "d"}}},
+		[]models.Tags{{}, {{"c", "d"}}},
 	},
 	{
 		"two common tags",

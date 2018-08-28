@@ -341,9 +341,9 @@ func TestOrCombinedMetadata(t *testing.T) {
 	assert.Equal(t, sink.Meta.Tags, models.Tags{{"a", "b"}})
 
 	expectedMetas := []block.SeriesMeta{
-		{Tags: models.Tags{{"foo", "bar"}, {"c", "d"}, {"e", "f"}}},
+		{Tags: models.Tags{{"c", "d"}, {"e", "f"}, {"foo", "bar"}}},
 		{Tags: models.Tags{{"baz", "qux"}, {"c", "d"}, {"e", "f"}}},
-		{Tags: models.Tags{{"foo", "bar"}, {"c", "*d"}, {"g", "h"}}},
+		{Tags: models.Tags{{"c", "*d"}, {"foo", "bar"}, {"g", "h"}}},
 		{Tags: models.Tags{{"baz", "qux"}, {"c", "*d"}, {"g", "h"}}},
 	}
 

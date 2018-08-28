@@ -227,7 +227,7 @@ func createStorageWriteQuery(t *testing.T) (*storage.WriteQuery, ts.Datapoints) 
 func TestEncodeWriteMessage(t *testing.T) {
 	write, points := createStorageWriteQuery(t)
 	encw := EncodeWriteMessage(write, id)
-	assert.Equal(t, tags0, encw.GetQuery().GetTags())
+	assert.Equal(t, tags0.StringMap(), encw.GetQuery().GetTags())
 	assert.Equal(t, ann, encw.GetQuery().GetAnnotation())
 	assert.Equal(t, int32(2), encw.GetQuery().GetUnit())
 	assert.Equal(t, id, encw.GetOptions().GetId())
